@@ -17,7 +17,7 @@ function promiseWrapper(func) {
     };
 }
 //--------------------------------------------------------------------------------
-function userValisator(req, res, next) {
+function userValidator(req, res, next) {
     const isUserValid = validator.isUserValid(req);
 
     if (isUserValid.error) {
@@ -35,10 +35,43 @@ function restifyUsers(router) {
             USER_COLL_NAME,
             dbSchemes.userScheme
             ),{
-                preCreate: promiseWrapper(userValisator)
+                preCreate: promiseWrapper(userValidator)
             });
 
     console.log(`User URI : ${userURI}`);
+}
+
+function restifyProjects(router) {
+    const projectsURI = restify.serve(
+        router,
+        mongoose.model(
+            'Projects',
+            dbSchemes.projects
+            ));
+
+    console.log(`project URI : ${projectsURI}`);
+}
+
+function restifyNews(router) {
+    const projectsURI = restify.serve(
+        router,
+        mongoose.model(
+            'News',
+            dbSchemes.projects
+            ));
+
+    console.log(`news URI : ${newsURI}`);
+}
+
+function restifyMessages(router) {
+    const projectsURI = restify.serve(
+        router,
+        mongoose.model(
+            'Messages',
+            dbSchemes.projects
+            ));
+
+    console.log(`messages URI : ${messagesURI}`);
 }
 //--------------------------------------------------------------------------------
 function restifyDB(router, onError) {
@@ -56,6 +89,9 @@ function restifyDB(router, onError) {
     mongoose.connection.on('open', () => {
         console.log(`Mongoose connection succeful URL : ${DB_URL}`);        
         restifyUsers(router);
+        restifyProjects(router);
+        restifyNews(router);
+        restifyMessages(router);
     });
 }
 //--------------------------------------------------------------------------------
