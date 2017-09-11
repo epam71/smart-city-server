@@ -9,6 +9,9 @@ const validator = require('./validator');
 const dbSchemes = require('./db-schemes');
 //--------------------------------------------------------------------------------
 const USER_COLL_NAME = 'users';
+const PROJECT_COLL_NAME = 'projects';
+const NEWS_COLL_NAME = 'news';
+const MESSAGE_COLL_NAME = 'messages';
 //--------------------------------------------------------------------------------
 function promiseWrapper(func) {
     return (req, res, next) => {
@@ -40,35 +43,35 @@ function restifyUsers(router) {
 
     console.log(`User URI : ${userURI}`);
 }
-
+//--------------------------------------------------------------------------------
 function restifyProjects(router) {
     const projectsURI = restify.serve(
         router,
         mongoose.model(
-            'Projects',
+            PROJECT_COLL_NAME,
             dbSchemes.projects
             ));
 
     console.log(`project URI : ${projectsURI}`);
 }
-
+//--------------------------------------------------------------------------------
 function restifyNews(router) {
-    const projectsURI = restify.serve(
+    const newsURI = restify.serve(
         router,
         mongoose.model(
-            'News',
-            dbSchemes.projects
+            NEWS_COLL_NAME,
+            dbSchemes.news
             ));
 
     console.log(`news URI : ${newsURI}`);
 }
-
+//--------------------------------------------------------------------------------
 function restifyMessages(router) {
-    const projectsURI = restify.serve(
+    const messagesURI = restify.serve(
         router,
         mongoose.model(
-            'Messages',
-            dbSchemes.projects
+            MESSAGE_COLL_NAME,
+            dbSchemes.messages
             ));
 
     console.log(`messages URI : ${messagesURI}`);
