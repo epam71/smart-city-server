@@ -60,7 +60,7 @@ const news = new Schema({
     },
     image: String,
     desc: String,
-    shortDesc: Script,
+    shortDesc: String,
     approved: Boolean,
     date: { type: Date, default: Date.now },
     comments: [{
