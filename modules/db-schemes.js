@@ -33,6 +33,9 @@ const projects = new Schema({
     desc: String,
     image: String,
     category:   String,
+    goals: String,
+    result: String,
+    rating: Number,
     date: { type: Date, default: Date.now },
     commercial: Boolean,
     budget: Number,
@@ -57,6 +60,8 @@ const news = new Schema({
     },
     image: String,
     desc: String,
+    shortDesc: Script,
+    approved: Boolean,
     date: { type: Date, default: Date.now },
     comments: [{
         username: String,
