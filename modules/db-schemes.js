@@ -29,7 +29,6 @@ const projects = new Schema({
         type: String,
         required: true,
     },
-    shortDesc: String,
     desc: String,
     image: String,
     category:   String,
@@ -60,7 +59,6 @@ const news = new Schema({
     },
     image: String,
     desc: String,
-    shortDesc: Script,
     approved: Boolean,
     date: { type: Date, default: Date.now },
     comments: [{
@@ -79,6 +77,10 @@ const messages = new Schema({
     email: {
         type: String,
         required: true
+    },
+    status: {
+        type: String,
+        enum: ['new', 'active', 'edited', 'closed']
     },
     subject: String,
     body: String,
