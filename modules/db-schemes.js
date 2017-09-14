@@ -29,22 +29,35 @@ const projects = new Schema({
         type: String,
         required: true,
     },
-    shortDesc: String,
     desc: String,
     image: String,
-    category:   String,
     goals: String,
     result: String,
-    rating: Number,
-    date: { type: Date, default: Date.now },
+    rating: { 
+        type: Number, 
+        default: 0 
+    },
+    date: { 
+        type: Date, 
+        default: Date.now 
+    },
     commercial: Boolean,
     budget: Number,
-    approved: Boolean,
-    done: Boolean,
+    status: {
+        type: String,
+        enum: ['new', 'active', 'edited', 'closed']
+    },
+    approved: { 
+        type: Boolean, 
+        default: false 
+    },
     comments: [{
         username: String,
         message: String,
-        date: Date 
+        date: { 
+            type: Date, 
+            default: Date.now 
+        },
     }],
 });
 //--------------------------------------------------------------------------------
@@ -60,7 +73,6 @@ const news = new Schema({
     },
     image: String,
     desc: String,
-    shortDesc: String,
     approved: Boolean,
     date: { type: Date, default: Date.now },
     comments: [{
