@@ -51,10 +51,6 @@ const projects = new Schema({
         type: Boolean, 
         default: false 
     },
-    done: { 
-        type: Boolean, 
-        default: false
-    },
     comments: [{
         username: String,
         message: String,
