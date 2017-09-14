@@ -34,16 +34,31 @@ const projects = new Schema({
     category:   String,
     goals: String,
     result: String,
-    rating: Number,
-    date: { type: Date, default: Date.now },
+    rating: { 
+        type: Number, 
+        default: 0 
+    },
+    date: { 
+        type: Date, 
+        default: Date.now 
+    },
     commercial: Boolean,
     budget: Number,
-    approved: Boolean,
-    done: Boolean,
+    approved: { 
+        type: Boolean, 
+        default: false 
+    },
+    done: { 
+        type: Boolean, 
+        default: false
+    },
     comments: [{
         username: String,
         message: String,
-        date: Date 
+        date: { 
+            type: Date, 
+            default: Date.now 
+        },
     }],
 });
 
