@@ -18,7 +18,7 @@ const userScheme = new Schema({
         required: true
     }
 });
-
+//--------------------------------------------------------------------------------
 const projects = new Schema({
     author: {
         type: String,
@@ -61,7 +61,7 @@ const projects = new Schema({
         },
     }],
 });
-
+//--------------------------------------------------------------------------------
 const news = new Schema({
     author: {
         type: String,
@@ -82,7 +82,7 @@ const news = new Schema({
         date: Date 
     }],
 });
-
+//--------------------------------------------------------------------------------
 const messages = new Schema({
     author: {
         type: String,
@@ -101,11 +101,10 @@ const messages = new Schema({
     body: String,
     date: Date
 });
-
 //--------------------------------------------------------------------------------
 module.exports = {
-    userScheme: userScheme,
-    projects: projects,
-    news: news,
-    messages: messages
+    userScheme,
+    projects,
+    news,
+    messages
 }
