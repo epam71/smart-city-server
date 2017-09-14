@@ -31,7 +31,6 @@ const projects = new Schema({
     },
     desc: String,
     image: String,
-    category:   String,
     goals: String,
     result: String,
     rating: { 
@@ -44,6 +43,10 @@ const projects = new Schema({
     },
     commercial: Boolean,
     budget: Number,
+    status: {
+        type: String,
+        enum: ['new', 'active', 'edited', 'closed']
+    },
     approved: { 
         type: Boolean, 
         default: false 
@@ -92,10 +95,6 @@ const messages = new Schema({
     email: {
         type: String,
         required: true
-    },
-    status: {
-        type: String,
-        enum: ['new', 'active', 'edited', 'closed']
     },
     subject: String,
     body: String,
