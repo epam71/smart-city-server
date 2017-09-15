@@ -18,7 +18,7 @@ const userScheme = new Schema({
         required: true
     }
 });
-
+//--------------------------------------------------------------------------------
 const projects = new Schema({
     author: {
         type: String,
@@ -31,22 +31,36 @@ const projects = new Schema({
     },
     desc: String,
     image: String,
-    category:   String,
     goals: String,
     result: String,
-    rating: Number,
-    date: { type: Date, default: Date.now },
+    rating: { 
+        type: Number, 
+        default: 0 
+    },
+    date: { 
+        type: Date, 
+        default: Date.now 
+    },
     commercial: Boolean,
     budget: Number,
-    approved: Boolean,
-    done: Boolean,
+    status: {
+        type: String,
+        enum: ['new', 'active', 'edited', 'closed']
+    },
+    approved: { 
+        type: Boolean, 
+        default: false 
+    },
     comments: [{
         username: String,
         message: String,
-        date: Date 
+        date: { 
+            type: Date, 
+            default: Date.now 
+        },
     }],
 });
-
+//--------------------------------------------------------------------------------
 const news = new Schema({
     author: {
         type: String,
@@ -67,7 +81,7 @@ const news = new Schema({
         date: Date 
     }],
 });
-
+//--------------------------------------------------------------------------------
 const messages = new Schema({
     author: {
         type: String,
@@ -78,19 +92,14 @@ const messages = new Schema({
         type: String,
         required: true
     },
-    status: {
-        type: String,
-        enum: ['new', 'active', 'edited', 'closed']
-    },
     subject: String,
     body: String,
     date: Date
 });
-
 //--------------------------------------------------------------------------------
 module.exports = {
-    userScheme: userScheme,
-    projects: projects,
-    news: news,
-    messages: messages
+    userScheme,
+    projects,
+    news,
+    messages
 }
