@@ -9,6 +9,7 @@ const validator = require('./validator');
 const dbSchemes = require('./db-schemes');
 //--------------------------------------------------------------------------------
 const USER_COLL_NAME = 'users';
+const API_PREFIX = '/api';
 //--------------------------------------------------------------------------------
 function promiseWrapper(func) {
     return (req, res, next) => {
@@ -76,7 +77,7 @@ function restifyMessages(router) {
 //--------------------------------------------------------------------------------
 function restifyDB(router, onError) {
     restify.defaults({
-        prefix: '/api',
+        prefix: API_PREFIX,
         version: '',
         onError: onError
     });
@@ -96,5 +97,7 @@ function restifyDB(router, onError) {
 }
 //--------------------------------------------------------------------------------
 module.exports = {
+    API_PREFIX,
+    promiseWrapper,
     restifyDB
 };
