@@ -42,7 +42,10 @@ const projects = new Schema({
         default: Date.now 
     },
     commercial: Boolean,
-    budget: Number,
+    budget: { 
+        type: Number, 
+        default: 0 
+    },
     status: {
         type: String,
         enum: ['new', 'active', 'edited', 'closed']
