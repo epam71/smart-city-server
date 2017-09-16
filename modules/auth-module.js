@@ -1,10 +1,11 @@
 'use strict';
 const fs = require('fs');
+const path = require('path');
 const request = require('request');
 const dbAgent = require('./db-agent');
 const validator = require('./validator');
 //--------------------------------------------------------------------------------
-const AUTH_MAP_FILE = `${__dirname}\\auth-map.json`;
+const AUTH_MAP_FILE = path.join(process.cwd(),'/modules/auth-map.json');
 const DEFAULT_GUEST_TOKEN = 'guest';
 const DEFAULT_GUEST_ROLE = 'guest';
 const ROOT_ROLE = 'root';
