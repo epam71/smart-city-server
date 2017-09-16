@@ -1,0 +1,1 @@
+[{"method":"*","path":"*","role":"root"},{"method":"GET","path":"/api/projects","role":"*"},{"method":"GET","path":"/api/news","role":"*"},{"method":"GET","path":"/api/messages","role":"*"}]

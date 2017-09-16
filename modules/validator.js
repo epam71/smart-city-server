@@ -18,6 +18,17 @@ function isUserValid(req) {
     return Joi.validate(req.body,userScheme);
 }
 //--------------------------------------------------------------------------------
+function isValidAuthMap(req) {
+    const authMapScheme = Joi.array().items( {
+        method: Joi.string().allow('POST', 'GET', 'PUT', 'PATCH','DELETE', '*').required(),
+        path: Joi.string().regex(/^(\/api|[*])/).required(),
+        role: Joi.string().allow('root', 'investor', 'user', 'guest').required(),
+    }).min(1);
+
+    return Joi.validate(req.body, authMapScheme);    
+}
+//--------------------------------------------------------------------------------
 module.exports = {
-    isUserValid
+    isUserValid,
+    isValidAuthMap
 };
