@@ -1,29 +1,16 @@
 'use strict';
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-//--------------------------------------------------------------------------------
-const userScheme = new Schema({
-    name: {
-        type: String,
-        required: true,
-        max: 30
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    password: {
-        type: String,
-        required: true
-    }
-});
-//--------------------------------------------------------------------------------
+
 const projects = new Schema({
     author: {
         type: String,
         required: true,
         max: 30
+    },
+    authorEmail: {
+        type: String,
+        required: true
     },
     projectName:  {
         type: String,
@@ -37,6 +24,10 @@ const projects = new Schema({
         type: Number, 
         default: 0 
     },
+    likes: [{
+        type: String,
+        required: true
+    }],
     date: { 
         type: Date, 
         default: Date.now 
@@ -63,7 +54,7 @@ const projects = new Schema({
         },
     }],
 });
-//--------------------------------------------------------------------------------
+
 const news = new Schema({
     author: {
         type: String,
@@ -84,7 +75,7 @@ const news = new Schema({
         date: Date 
     }],
 });
-//--------------------------------------------------------------------------------
+
 const messages = new Schema({
     author: {
         type: String,
@@ -97,11 +88,14 @@ const messages = new Schema({
     },
     subject: String,
     body: String,
-    date: Date
+    date: Date,
+    new: {
+        type: Boolean,
+        default: true
+    }
 });
-//--------------------------------------------------------------------------------
+
 module.exports = {
-    userScheme,
     projects,
     news,
     messages

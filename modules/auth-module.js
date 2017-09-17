@@ -4,7 +4,7 @@ const path = require('path');
 const request = require('request');
 const dbAgent = require('./db-agent');
 const validator = require('./validator');
-//--------------------------------------------------------------------------------
+
 const AUTH_MAP_FILE = path.join(process.cwd(),'/modules/auth-map.json');
 const DEFAULT_GUEST_TOKEN = 'guest';
 const DEFAULT_GUEST_ROLE = 'guest';
@@ -16,11 +16,7 @@ const apiMaskRegExp = new RegExp( `^${dbAgent.API_PREFIX}`);
 let authMap;
 //basically we have four access level
 //root, investor, user, guest
-//--------------------------------------------------------------------------------
-function isAPIRequest(req) {
-    return req.url.match(apiMaskRegExp);
-}
-//--------------------------------------------------------------------------------
+
 function login(userName, password, done) {
     if (password === DEFAULT_GUEST_TOKEN || !userName || !password) {
         return done( null, { 
@@ -43,7 +39,7 @@ function login(userName, password, done) {
                     try {
                         ob = JSON.parse(body);
                     } catch (err) {
-                        done(new Error('Wrong auth0 user profile'));
+                        done(new Error('Unable to parse auth0 user profile'));
                         return;
                     }
                     if (ob.hasOwnProperty(AUTH0_ROLE_FIELD) &&
@@ -60,12 +56,12 @@ function login(userName, password, done) {
         });
     }
 }
-//--------------------------------------------------------------------------------
+
 function accessControl(req, res, next) {
     const anyValue = '*';
     let user = req.user;    
 
-    if (isAPIRequest(req) && !authMap.find(el => 
+    if (!authMap.find(el => 
             (el.method === anyValue || el.method === req.method) &&
             (el.path === anyValue || req.url.indexOf(el.path) === 0) &&
             ( el.role === anyValue || el.role === user.role)
@@ -76,7 +72,7 @@ function accessControl(req, res, next) {
     }
     next();
 }
-//--------------------------------------------------------------------------------
+
 function readReadAuthMap() {
     try {
         authMap = JSON.parse(fs.readFileSync(AUTH_MAP_FILE));
@@ -84,15 +80,15 @@ function readReadAuthMap() {
         console.log('Auth map confiration error');
     }
 }
-//--------------------------------------------------------------------------------
+
 function writeReadAuthMap() {
     fs.writeFileSync(AUTH_MAP_FILE, JSON.stringify(authMap));
 }    
-//--------------------------------------------------------------------------------
+
 function getAuthMap(req, res, next) {
     res.json(authMap);
 }
-//--------------------------------------------------------------------------------
+
 function posAuthMap(req, res, next) {
     let isValidAuthMap = validator.isValidAuthMap(req);
     let tempAuthMap = authMap;
@@ -110,16 +106,16 @@ function posAuthMap(req, res, next) {
         next(err);
     }
 }
-//--------------------------------------------------------------------------------
+
 function checkUser(req, res, next) {
     let resObj = {message: 'Server identify the user'};
 
     Object.assign(resObj,req.user);    
     res.json(resObj)
 }
-//--------------------------------------------------------------------------------
+
 readReadAuthMap();
-//--------------------------------------------------------------------------------
+
 module.exports = {
     login,
     accessControl: dbAgent.promiseWrapper(accessControl),
