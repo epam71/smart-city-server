@@ -95,6 +95,7 @@ async function postProjectLike(req, res, next) {
 
     if (isIdFilled.error || isEmailFilled.error) {
         next(isIdFilled.error || isEmailFilled.error);
+        return;
     }
 
     db = await connectDB();
@@ -140,7 +141,8 @@ async function postProjectLike(req, res, next) {
         )();
     db.close();
     res.json({
-        message: `Project ${projectId} user ${email} like posted`
+        message: `Project ${projectId} user ${email} like posted`,
+        currentRating: project.rating
     });    
 }
 
