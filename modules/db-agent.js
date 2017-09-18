@@ -11,7 +11,6 @@ const dbSchemes = require('./db-schemes');
 const PROJECT_COLL_NAME = 'projects';
 const NEWS_COLL_NAME = 'news';
 const MESSAGE_COLL_NAME = 'messages';
-const API_PREFIX = '';
 
 function promiseWrapper(func) {
     return (req, res, next) => {
@@ -55,7 +54,7 @@ function restifyMessages(router) {
 
 function restifyDB(router, onError) {
     restify.defaults({
-        prefix: API_PREFIX,
+        prefix: '',
         version: '',
         onError: onError
     });
@@ -147,7 +146,6 @@ async function postProjectLike(req, res, next) {
 }
 
 module.exports = {
-    API_PREFIX,
     promiseWrapper,
     restifyDB,
     postProjectLike: promiseWrapper(postProjectLike)
