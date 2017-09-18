@@ -11,7 +11,7 @@ const dbSchemes = require('./db-schemes');
 const PROJECT_COLL_NAME = 'projects';
 const NEWS_COLL_NAME = 'news';
 const MESSAGE_COLL_NAME = 'messages';
-const API_PREFIX = '/api';
+const API_PREFIX = '';
 
 function promiseWrapper(func) {
     return (req, res, next) => {

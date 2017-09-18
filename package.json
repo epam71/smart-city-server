@@ -20,6 +20,7 @@
     "method-override": "^2.3.9",
     "mongodb": "^2.2.31",
     "mongoose": "^4.11.9",
+    "nodemailer": "^4.1.0",
     "passport": "^0.4.0",
     "passport-http": "^0.3.0",
     "request": "^2.81.0"

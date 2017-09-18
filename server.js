@@ -12,6 +12,7 @@ const BasicStrategy = require('passport-http').BasicStrategy;
 
 const dbAgent = require('./modules/db-agent');
 const authModule = require('./modules/auth-module');
+const mailSender = require('./modules/mail-sender');
 
 passport.use(new BasicStrategy(authModule.login));
 
@@ -34,6 +35,7 @@ app.route(`${dbAgent.API_PREFIX}/auth-map` )
     .post(authModule.postAuthMap);
 app.get(`${dbAgent.API_PREFIX}/auth-test`, authModule.checkUser);
 app.post(`${dbAgent.API_PREFIX}/projects/:id/likes`, dbAgent.postProjectLike);
+app.post('/notifications', mailSender.sendEmail);
 
 dbAgent.restifyDB(router, onError);
 app.use(router);

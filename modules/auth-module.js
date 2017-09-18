@@ -12,7 +12,6 @@ const ROOT_ROLE = 'root';
 const USER_INFO_URL = 'https://smart-city-lviv.eu.auth0.com/userinfo';
 const AUTH0_ROLE_FIELD = 'https://role';
 const AUTH0_EMAIL_FIELD = 'https://email';
-const apiMaskRegExp = new RegExp( `^${dbAgent.API_PREFIX}`);
 let authMap;
 //basically we have four access level
 //root, investor, user, guest

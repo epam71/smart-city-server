@@ -32,8 +32,20 @@ function isValidAuthMap(req) {
     return Joi.validate(req.body, authMapScheme);    
 }
 
+function isEmailBodyValid(req) {
+    const scheme = Joi.object().keys({
+        email: Joi.string().email().required(),
+        subject: Joi.string().required(),
+        text: Joi.string().required(),
+        html: Joi.string().required()
+    });
+
+    return Joi.validate(req.body,scheme);
+}
+
 module.exports = {
     isValidAuthMap,
     isIdFilled,
-    isEmailFilled
+    isEmailFilled,
+    isEmailBodyValid
 };
