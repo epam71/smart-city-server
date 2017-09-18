@@ -12,17 +12,18 @@ const ROOT_ROLE = 'root';
 const USER_INFO_URL = 'https://smart-city-lviv.eu.auth0.com/userinfo';
 const AUTH0_ROLE_FIELD = 'https://role';
 const AUTH0_EMAIL_FIELD = 'https://email';
-const apiMaskRegExp = new RegExp( `^${dbAgent.API_PREFIX}`);
 let authMap;
 //basically we have four access level
 //root, investor, user, guest
 
 function login(userName, password, done) {
-    if (password === DEFAULT_GUEST_TOKEN || !userName || !password) {
+    if (password === DEFAULT_GUEST_TOKEN) {
         return done( null, { 
             userName,
             role: DEFAULT_GUEST_ROLE 
         });            
+    } else if (!userName || !password) {
+        done(new Error('Wrong username or token' + (!password ? ', empty token!': '')));
     } else {
         //here we go to auth0 and verify the user
         //password is our accessToken

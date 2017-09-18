@@ -12,11 +12,14 @@ const BasicStrategy = require('passport-http').BasicStrategy;
 
 const dbAgent = require('./modules/db-agent');
 const authModule = require('./modules/auth-module');
+const mailSender = require('./modules/mail-sender');
 
 passport.use(new BasicStrategy(authModule.login));
 
 app.use((req, res, next) => {
     let t = 't';
+
+    console.log(req.url + ' ==== ' + req.headers.authorization);
 
     next();
 });
@@ -29,11 +32,12 @@ if (!process.env.PORT || process.env.USE_PASSPORT) {
     app.use(passport.authenticate('basic', { session: false }));
     app.use(authModule.accessControl);
 }
-app.route(`${dbAgent.API_PREFIX}/auth-map` )
+app.route(`/auth-map` )
     .get(authModule.getAuthMap)
     .post(authModule.postAuthMap);
-app.get(`${dbAgent.API_PREFIX}/auth-test`, authModule.checkUser);
-app.post(`${dbAgent.API_PREFIX}/projects/:id/likes`, dbAgent.postProjectLike);
+app.get('/auth-test', authModule.checkUser);
+app.post('/projects/:id/likes', dbAgent.postProjectLike);
+app.post('/notifications', mailSender.sendEmail);
 
 dbAgent.restifyDB(router, onError);
 app.use(router);
