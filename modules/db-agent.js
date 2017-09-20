@@ -145,8 +145,184 @@ async function postProjectLike(req, res, next) {
     });    
 }
 
+async function postNewsLike(req, res, next) {
+    let isIdFilled = validator.isIdFilled(req);
+    let isEmailFilled = validator.isEmailFilled(req);
+    let newsId = req.params.id;
+    let email = req.body.email;
+    let news;
+    let isPosted;
+    let db;
+
+    if (isIdFilled.error || isEmailFilled.error) {
+        next(isIdFilled.error || isEmailFilled.error);
+        return;
+    }
+
+    db = await connectDB();
+    news = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(NEWS_COLL_NAME).findOne({_id: ObjectId(newsId)},
+                    (err, result) => {
+                    if (err || result === null) {
+                        res.status(400);
+                        reject(err || new Error(`News id ${newsId} doesn\'t exist`));
+                    }
+                    resolve(result);
+                });
+            })
+        )();
+    news.likes = news.likes || [];
+    news.rating = typeof news.rating !== 'number' || isNaN(news.rating) ? 0 :news.rating;
+    if (news.likes.indexOf(email) >= 0) {
+        res.status(400);
+        next(new Error(`User ${email} can't post like twice`));
+        return;
+    }
+
+    news.rating += 1;
+    news.likes.push(email);
+
+    isPosted = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(NEWS_COLL_NAME).updateOne( {_id: ObjectId(newsId)}, 
+                    { $set: {
+                            rating: news.rating,
+                            likes: news.likes
+                        }
+                    },
+                    (err, result) => {
+                        if (err) {
+                            res.status(400);
+                            reject(err);
+                        }
+                        resolve(result);
+                });
+            })
+        )();
+    db.close();
+    res.json({
+        message: `News ${newsId} user ${email} like posted`,
+        currentRating: news.rating
+    });    
+}
+
+
+async function postProjectComments(req, res, next) {
+//    let isIdFilled = validator.isIdFilled(req);
+//    let isEmailFilled = validator.isEmailFilled(req);
+    let projectId = req.params.id;
+    let username = req.body.username;
+    let message = req.body.message;
+    let project;
+    let isPosted;
+    let db;
+
+//    if (isIdFilled.error || isEmailFilled.error) {
+//        next(isIdFilled.error || isEmailFilled.error);
+//        return;
+//    }
+
+    db = await connectDB();
+    project = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(PROJECT_COLL_NAME).findOne({_id: ObjectId(projectId)},
+                    (err, result) => {
+                    if (err || result === null) {
+                        res.status(400);
+                        reject(err || new Error(`Project id ${projectId} doesn\'t exist`));
+                    }
+                    resolve(result);
+                });
+            })
+        )();
+    
+    
+    isPosted = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(PROJECT_COLL_NAME).updateOne({_id: ObjectId(projectId)}, 
+                    {$push: 
+                     {comments: {
+                         username: username,
+                         message: message
+                     }}
+                    },
+                    (err, result) => {
+                        if (err) {
+                            res.status(400);
+                            reject(err);
+                        }
+                        resolve(result);
+                });
+            })
+        )();
+
+    db.close();
+    res.json({
+        message: `User ${username} added comment in project ${projectId}`
+    });   
+}
+
+async function postNewsComments(req, res, next) {
+//    let isIdFilled = validator.isIdFilled(req);
+//    let isEmailFilled = validator.isEmailFilled(req);
+    let newsId = req.params.id;
+    let username = req.body.username;
+    let message = req.body.message;
+    let news;
+    let isPosted;
+    let db;
+
+//    if (isIdFilled.error || isEmailFilled.error) {
+//        next(isIdFilled.error || isEmailFilled.error);
+//        return;
+//    }
+
+    db = await connectDB();
+    news = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(NEWS_COLL_NAME).findOne({_id: ObjectId(newsId)},
+                    (err, result) => {
+                    if (err || result === null) {
+                        res.status(400);
+                        reject(err || new Error(`News id ${newsId} doesn\'t exist`));
+                    }
+                    resolve(result);
+                });
+            })
+        )();
+    
+    
+    isPosted = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(NEWS_COLL_NAME).updateOne({_id: ObjectId(newsId)}, 
+                    {$push: 
+                     {comments: {
+                         username: username,
+                         message: message
+                     }}
+                    },
+                    (err, result) => {
+                        if (err) {
+                            res.status(400);
+                            reject(err);
+                        }
+                        resolve(result);
+                });
+            })
+        )();
+
+    db.close();
+    res.json({
+        message: `User ${username} added comment in news ${newsId}`
+    });   
+}
+
 module.exports = {
     promiseWrapper,
     restifyDB,
-    postProjectLike: promiseWrapper(postProjectLike)
+    postProjectLike: promiseWrapper(postProjectLike),
+    postNewsLike: promiseWrapper(postNewsLike),
+    postProjectComments: promiseWrapper(postProjectComments),
+    postNewsComments: promiseWrapper(postNewsComments)
 }

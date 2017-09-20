@@ -46,8 +46,14 @@ const projects = new Schema({
         default: false 
     },
     comments: [{
-        username: String,
-        message: String,
+        username: {
+            type: String,
+            required: true
+        },
+        message: {
+            type: String,
+            required: true
+        },
         date: { 
             type: Date, 
             default: Date.now 
@@ -70,9 +76,18 @@ const news = new Schema({
     approved: Boolean,
     date: { type: Date, default: Date.now },
     comments: [{
-        username: String,
-        message: String,
-        date: Date 
+        username: {
+            type: String,
+            required: true
+        },
+        message: {
+            type: String,
+            required: true
+        },
+        date: { 
+            type: Date,
+            default: Date.now
+        }
     }],
 });
 

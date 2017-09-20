@@ -28,7 +28,8 @@ app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(cors());
 //during developing phase we activate passport mode only via setting USE_PASSPORT
-if (!process.env.PORT || process.env.USE_PASSPORT) {
+//if (!process.env.PORT || process.env.USE_PASSPORT)
+if(false){
     app.use(passport.authenticate('basic', { session: false }));
     app.use(authModule.accessControl);
 }
@@ -37,6 +38,9 @@ app.route(`/auth-map` )
     .post(authModule.postAuthMap);
 app.get('/auth-test', authModule.checkUser);
 app.post('/projects/:id/likes', dbAgent.postProjectLike);
+app.post('/news/:id/likes', dbAgent.postNewsLike);
+app.post('/projects/:id/comments', dbAgent.postProjectComments);
+app.post('/news/:id/comments', dbAgent.postNewsComments);
 app.post('/notifications', mailSender.sendEmail);
 
 dbAgent.restifyDB(router, onError);
