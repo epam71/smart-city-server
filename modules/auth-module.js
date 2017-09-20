@@ -36,13 +36,18 @@ function login(userName, password, done) {
                     done(err);
                 } else {
                     let ob;
+                    let addWarn = '';
 
                     try {
+                        console.log(`2) Try to parse body: ${body}`);
                         ob = JSON.parse(body);
                     } catch (err) {
-                        done(new Error('Unable to parse auth0 user profile'));
+                        console.log(`3) Parsing error`);
+                        addWarn = body === 'Too Many Requests' ? ' ,please try later': '';
+                        done(new Error(`Unable to parse auth0 user profile, response from auth0 ${body} ${addWarn}`));
                         return;
                     }
+                    console.log('3) Successfull parsing');
                     if (ob.hasOwnProperty(AUTH0_ROLE_FIELD) &&
                         ob.hasOwnProperty(AUTH0_EMAIL_FIELD) && 
                         ob[AUTH0_EMAIL_FIELD] === userName) {

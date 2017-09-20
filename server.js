@@ -19,7 +19,7 @@ passport.use(new BasicStrategy(authModule.login));
 app.use((req, res, next) => {
     let t = 't';
 
-    console.log(req.url + ' ==== ' + req.headers.authorization);
+    console.log(`1) Authorization in header: ${req.url}: ${req.headers.authorization}`);
 
     next();
 });
