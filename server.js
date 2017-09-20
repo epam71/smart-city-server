@@ -28,8 +28,7 @@ app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(cors());
 //during developing phase we activate passport mode only via setting USE_PASSPORT
-//if (!process.env.PORT || process.env.USE_PASSPORT)
-if(false){
+if (!process.env.PORT || process.env.USE_PASSPORT){
     app.use(passport.authenticate('basic', { session: false }));
     app.use(authModule.accessControl);
 }
