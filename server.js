@@ -18,18 +18,19 @@ const CONTROL_AUTH = !process.env.PORT || process.env.USE_PASSPORT;
 
 passport.use(new BasicStrategy(authModule.login));
 
+app.use(cors());
 app.use((req, res, next) => {
     console.log(`1) Authorization in header: ${req.url}: ${req.headers.authorization}`);
     if (CONTROL_AUTH && !req.headers.authorization) {
         res.status(400);
         next(new Error('Empty authorization data!'));
+        return;
     }
     next();
 });
 
 app.use(bodyParser.json());
 app.use(methodOverride());
-app.use(cors());
 //during developing phase we activate passport mode only via setting USE_PASSPORT
 if (CONTROL_AUTH) {
     app.use(passport.authenticate('basic', { session: false }));
