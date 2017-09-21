@@ -19,13 +19,21 @@ function promiseWrapper(func) {
     };
 }
 
+function hasId(req,res,next){
+ if(req.params && !req.params.hasOwnProperty("id")){
+    res.status(400);
+    next(new Error('To delete you need enter id.'));
+  }
+}
+
 function restifyProjects(router) {
     const projectsURI = restify.serve(
         router,
         mongoose.model(
             PROJECT_COLL_NAME,
             dbSchemes.projects
-            ));
+            ), {preDelete: hasId
+            });
 
     console.log(`project URI : ${projectsURI}`);
 }
@@ -36,7 +44,8 @@ function restifyNews(router) {
         mongoose.model(
             NEWS_COLL_NAME,
             dbSchemes.news
-            ));
+            ),{preDelete: hasId
+            });
 
     console.log(`news URI : ${newsURI}`);
 }
@@ -47,7 +56,8 @@ function restifyMessages(router) {
         mongoose.model(
             MESSAGE_COLL_NAME,
             dbSchemes.messages
-            ));
+            ),{preDelete: hasId
+            });
 
     console.log(`messages URI : ${messagesURI}`);
 }
@@ -346,7 +356,7 @@ module.exports = {
     restifyDB,
     postProjectLike: promiseWrapper(postProjectLike),
     postNewsLike: promiseWrapper(postNewsLike),
-    postProjectComments,
-    postNewsComments,
-    postMessage,
+    postProjectComments: promiseWrapper(postProjectComments),
+    postNewsComments: promiseWrapper(postNewsComments),
+    postMessage: promiseWrapper(postMessage)
 }
