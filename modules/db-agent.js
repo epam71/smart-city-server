@@ -209,19 +209,12 @@ async function postNewsLike(req, res, next) {
 
 
 async function postProjectComments(req, res, next) {
-//    let isIdFilled = validator.isIdFilled(req);
-//    let isEmailFilled = validator.isEmailFilled(req);
     let projectId = req.params.id;
     let username = req.body.username;
     let message = req.body.message;
     let project;
     let isPosted;
     let db;
-
-//    if (isIdFilled.error || isEmailFilled.error) {
-//        next(isIdFilled.error || isEmailFilled.error);
-//        return;
-//    }
 
     db = await connectDB();
     project = await (() => 
@@ -244,7 +237,8 @@ async function postProjectComments(req, res, next) {
                     {$push: 
                      {comments: {
                          username: username,
-                         message: message
+                         message: message,
+                         date: new Date()
                      }}
                     },
                     (err, result) => {
@@ -259,24 +253,17 @@ async function postProjectComments(req, res, next) {
 
     db.close();
     res.json({
-        message: `User ${username} added comment in project ${projectId}`
+        message: `User ${username} commented project: ${message}`
     });   
 }
 
 async function postNewsComments(req, res, next) {
-//    let isIdFilled = validator.isIdFilled(req);
-//    let isEmailFilled = validator.isEmailFilled(req);
     let newsId = req.params.id;
     let username = req.body.username;
     let message = req.body.message;
     let news;
     let isPosted;
     let db;
-
-//    if (isIdFilled.error || isEmailFilled.error) {
-//        next(isIdFilled.error || isEmailFilled.error);
-//        return;
-//    }
 
     db = await connectDB();
     news = await (() => 
@@ -299,7 +286,8 @@ async function postNewsComments(req, res, next) {
                     {$push: 
                      {comments: {
                          username: username,
-                         message: message
+                         message: message,
+                         date: new Date()
                      }}
                     },
                     (err, result) => {
@@ -314,7 +302,7 @@ async function postNewsComments(req, res, next) {
 
     db.close();
     res.json({
-        message: `User ${username} added comment in news ${newsId}`
+        message: `User ${username} commented news ${message}`
     });   
 }
 
