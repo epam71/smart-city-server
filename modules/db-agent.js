@@ -346,7 +346,7 @@ module.exports = {
     restifyDB,
     postProjectLike: promiseWrapper(postProjectLike),
     postNewsLike: promiseWrapper(postNewsLike),
-    postProjectComments: promiseWrapper(postProjectComments),
-    postNewsComments: promiseWrapper(postNewsComments),
-    postMessage: promiseWrapper(postMessage)
+    postProjectComments,
+    postNewsComments,
+    postMessage,
 }
