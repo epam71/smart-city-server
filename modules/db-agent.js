@@ -302,8 +302,43 @@ async function postNewsComments(req, res, next) {
 
     db.close();
     res.json({
-        message: `User ${username} commented news ${message}`
+        message: `User ${username} commented news: ${message}`
     });   
+}
+
+async function postMessage(req, res, next) {
+    let email = req.body.email;
+    let author = req.body.author;
+    let subject = req.body.subject;
+    let text = req.body.text;
+
+    let addMessage;
+    let db;
+
+    db = await connectDB();
+    addMessage = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(MESSAGE_COLL_NAME).save({
+                    author: author,
+                    email: email,
+                    subject: subject,
+                    body: text,
+                    date: new Date(),
+                    new: true
+                }, 
+                (err, result) => {
+                        if (err) {
+                            res.status(400);
+                            reject(err);
+                        }
+                        resolve(result);
+                });
+            })
+        )();
+    db.close();
+    res.json({
+        message: `User ${author} send message!`
+    });    
 }
 
 module.exports = {
@@ -312,5 +347,6 @@ module.exports = {
     postProjectLike: promiseWrapper(postProjectLike),
     postNewsLike: promiseWrapper(postNewsLike),
     postProjectComments: promiseWrapper(postProjectComments),
-    postNewsComments: promiseWrapper(postNewsComments)
+    postNewsComments: promiseWrapper(postNewsComments),
+    postMessage: promiseWrapper(postMessage)
 }
