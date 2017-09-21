@@ -103,7 +103,10 @@ const messages = new Schema({
     },
     subject: String,
     body: String,
-    date: Date,
+    date: { 
+        type: Date,
+        default: Date.now
+    },
     new: {
         type: Boolean,
         default: true

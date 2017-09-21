@@ -19,13 +19,21 @@ function promiseWrapper(func) {
     };
 }
 
+function hasId(req,res,next){
+ if(req.params && !req.params.hasOwnProperty("id")){
+    res.status(400);
+    next(new Error('To delete you need enter id.'));
+  }
+}
+
 function restifyProjects(router) {
     const projectsURI = restify.serve(
         router,
         mongoose.model(
             PROJECT_COLL_NAME,
             dbSchemes.projects
-            ));
+            ), {preDelete: hasId
+            });
 
     console.log(`project URI : ${projectsURI}`);
 }
@@ -36,7 +44,8 @@ function restifyNews(router) {
         mongoose.model(
             NEWS_COLL_NAME,
             dbSchemes.news
-            ));
+            ),{preDelete: hasId
+            });
 
     console.log(`news URI : ${newsURI}`);
 }
@@ -47,7 +56,8 @@ function restifyMessages(router) {
         mongoose.model(
             MESSAGE_COLL_NAME,
             dbSchemes.messages
-            ));
+            ),{preDelete: hasId
+            });
 
     console.log(`messages URI : ${messagesURI}`);
 }
@@ -209,19 +219,12 @@ async function postNewsLike(req, res, next) {
 
 
 async function postProjectComments(req, res, next) {
-//    let isIdFilled = validator.isIdFilled(req);
-//    let isEmailFilled = validator.isEmailFilled(req);
     let projectId = req.params.id;
     let username = req.body.username;
     let message = req.body.message;
     let project;
     let isPosted;
     let db;
-
-//    if (isIdFilled.error || isEmailFilled.error) {
-//        next(isIdFilled.error || isEmailFilled.error);
-//        return;
-//    }
 
     db = await connectDB();
     project = await (() => 
@@ -244,7 +247,8 @@ async function postProjectComments(req, res, next) {
                     {$push: 
                      {comments: {
                          username: username,
-                         message: message
+                         message: message,
+                         date: new Date()
                      }}
                     },
                     (err, result) => {
@@ -259,24 +263,17 @@ async function postProjectComments(req, res, next) {
 
     db.close();
     res.json({
-        message: `User ${username} added comment in project ${projectId}`
+        message: `User ${username} commented project: ${message}`
     });   
 }
 
 async function postNewsComments(req, res, next) {
-//    let isIdFilled = validator.isIdFilled(req);
-//    let isEmailFilled = validator.isEmailFilled(req);
     let newsId = req.params.id;
     let username = req.body.username;
     let message = req.body.message;
     let news;
     let isPosted;
     let db;
-
-//    if (isIdFilled.error || isEmailFilled.error) {
-//        next(isIdFilled.error || isEmailFilled.error);
-//        return;
-//    }
 
     db = await connectDB();
     news = await (() => 
@@ -299,7 +296,8 @@ async function postNewsComments(req, res, next) {
                     {$push: 
                      {comments: {
                          username: username,
-                         message: message
+                         message: message,
+                         date: new Date()
                      }}
                     },
                     (err, result) => {
@@ -314,8 +312,43 @@ async function postNewsComments(req, res, next) {
 
     db.close();
     res.json({
-        message: `User ${username} added comment in news ${newsId}`
+        message: `User ${username} commented news: ${message}`
     });   
+}
+
+async function postMessage(req, res, next) {
+    let email = req.body.email;
+    let author = req.body.author;
+    let subject = req.body.subject;
+    let text = req.body.text;
+
+    let addMessage;
+    let db;
+
+    db = await connectDB();
+    addMessage = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(MESSAGE_COLL_NAME).save({
+                    author: author,
+                    email: email,
+                    subject: subject,
+                    body: text,
+                    date: new Date(),
+                    new: true
+                }, 
+                (err, result) => {
+                        if (err) {
+                            res.status(400);
+                            reject(err);
+                        }
+                        resolve(result);
+                });
+            })
+        )();
+    db.close();
+    res.json({
+        message: `User ${author} send message!`
+    });    
 }
 
 module.exports = {
@@ -324,5 +357,6 @@ module.exports = {
     postProjectLike: promiseWrapper(postProjectLike),
     postNewsLike: promiseWrapper(postNewsLike),
     postProjectComments: promiseWrapper(postProjectComments),
-    postNewsComments: promiseWrapper(postNewsComments)
+    postNewsComments: promiseWrapper(postNewsComments),
+    postMessage: promiseWrapper(postMessage)
 }
