@@ -40,7 +40,6 @@ app.post('/projects/:id/likes', dbAgent.postLikes);
 app.post('/news/:id/likes', dbAgent.postLikes);
 app.post('/projects/:id/comments', dbAgent.postComments);
 app.post('/news/:id/comments', dbAgent.postComments);
-app.post('/messages/new', dbAgent.postMessage);
 app.post('/notifications', mailSender.sendEmail);
 
 dbAgent.restifyDB(router, onError);

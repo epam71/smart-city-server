@@ -187,8 +187,7 @@ async function postComments(req, res, next) {
                     {$push: 
                      {comments: {
                          username: username,
-                         message: message,
-                         date: new Date()
+                         message: message
                      }}
                     },
                     (err, result) => {
@@ -207,45 +206,10 @@ async function postComments(req, res, next) {
     });   
 }
 
-async function postMessage(req, res, next) {
-    let email = req.body.email;
-    let author = req.body.author;
-    let subject = req.body.subject;
-    let text = req.body.text;
-
-    let addMessage;
-    let db;
-
-    db = await connectDB();
-    addMessage = await (() => 
-            new Promise((resolve, reject) => {
-                db.collection(MESSAGE_COLL_NAME).save({
-                    author: author,
-                    email: email,
-                    subject: subject,
-                    body: text,
-                    date: new Date(),
-                    new: true
-                }, 
-                (err, result) => {
-                        if (err) {
-                            res.status(400);
-                            reject(err);
-                        }
-                        resolve(result);
-                });
-            })
-        )();
-    db.close();
-    res.json({
-        message: `User ${author} send message!`
-    });    
-}
 
 module.exports = {
     promiseWrapper,
     restifyDB,
     postLikes: promiseWrapper(postLikes),
-    postComments: promiseWrapper(postComments),
-    postMessage: promiseWrapper(postMessage)
+    postComments: promiseWrapper(postComments)
 }
