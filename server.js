@@ -40,11 +40,10 @@ app.route(`/auth-map` )
     .get(authModule.getAuthMap)
     .post(authModule.postAuthMap);
 app.get('/auth-test', authModule.checkUser);
-app.post('/projects/:id/likes', dbAgent.postProjectLike);
-app.post('/news/:id/likes', dbAgent.postNewsLike);
-app.post('/projects/:id/comments', dbAgent.postProjectComments);
-app.post('/news/:id/comments', dbAgent.postNewsComments);
-app.post('/messages/new', dbAgent.postMessage);
+app.post('/projects/:id/likes', dbAgent.postLikes);
+app.post('/news/:id/likes', dbAgent.postLikes);
+app.post('/projects/:id/comments', dbAgent.postComments);
+app.post('/news/:id/comments', dbAgent.postComments);
 app.post('/notifications', mailSender.sendEmail);
 
 dbAgent.restifyDB(router, onError);
