@@ -75,6 +75,14 @@ const news = new Schema({
     desc: String,
     approved: Boolean,
     date: { type: Date, default: Date.now },
+    rating: { 
+        type: Number, 
+        default: 0 
+    },
+    likes: [{
+        type: String,
+        required: true
+    }],
     comments: [{
         username: {
             type: String,
