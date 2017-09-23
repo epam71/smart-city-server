@@ -24,6 +24,7 @@ function hasId(req,res,next){
     res.status(400);
     next(new Error('To delete item you need to enter id.'));
   }
+    next();
 }
 
 function restifyProjects(router) {
@@ -151,7 +152,7 @@ async function postLikes(req, res, next) {
         )();
     db.close();
     res.json({
-        message: `User ${email} like ${DB_COLL_NAME} with id ${paramsId}`,
+        message: `You liked this ${DB_COLL_NAME}`,
         currentRating: collName.rating
     });    
 }
@@ -202,7 +203,7 @@ async function postComments(req, res, next) {
 
     db.close();
     res.json({
-        message: `User ${username} commented ${DB_COLL_NAME}: ${message}`
+        message: `Comment was successfully added!`
     });   
 }
 
