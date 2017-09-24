@@ -69,15 +69,12 @@ function login(userName, password, done) {
                     let addWarn = '';
 
                     try {
-                        console.log(`2) Try to parse body: ${body}`);
                         ob = JSON.parse(body);
                     } catch (err) {
-                        console.log(`3) Parsing error`);
                         addWarn = body === 'Too Many Requests' ? ', please try later': '';
-                        done(new Error(`Unable to parse auth0 user profile, response from auth0 - ${body} ${addWarn}`));
+                        done(new Error(`Auth0 - ${body}${addWarn}`));
                         return;
                     }
-                    console.log('3) Successfull parsing');
                     if (ob.hasOwnProperty(AUTH0_ROLE_FIELD) &&
                         ob.hasOwnProperty(AUTH0_EMAIL_FIELD) && 
                         ob[AUTH0_EMAIL_FIELD] === userName) {
@@ -144,13 +141,6 @@ function posAuthMap(req, res, next) {
     }
 }
 
-function checkUser(req, res, next) {
-    let resObj = {message: 'Server identify the user'};
-
-    Object.assign(resObj,req.user);    
-    res.json(resObj)
-}
-
 readReadAuthMap();
 
 module.exports = {
@@ -158,5 +148,4 @@ module.exports = {
     accessControl: dbAgent.promiseWrapper(accessControl),
     getAuthMap: dbAgent.promiseWrapper(getAuthMap),
     postAuthMap: dbAgent.promiseWrapper(posAuthMap),
-    checkUser: dbAgent.promiseWrapper(checkUser)
 }
