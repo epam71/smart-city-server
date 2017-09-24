@@ -24,6 +24,7 @@ function hasId(req,res,next){
     res.status(400);
     next(new Error('To delete item you need to enter id.'));
   }
+  next();
 }
 
 function restifyProjects(router) {
