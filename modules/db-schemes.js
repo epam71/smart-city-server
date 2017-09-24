@@ -1,6 +1,7 @@
 'use strict';
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const validator = require('./validator');
 
 const projects = new Schema({
     author: {
@@ -10,7 +11,8 @@ const projects = new Schema({
     },
     authorEmail: {
         type: String,
-        required: true
+        required: true,
+        match: validator.EMAIL
     },
     projectName:  {
         type: String,
@@ -26,7 +28,8 @@ const projects = new Schema({
     },
     likes: [{
         type: String,
-        required: true
+        required: true,
+        match: validator.EMAIL
     }],
     date: { 
         type: Date, 
@@ -48,7 +51,8 @@ const projects = new Schema({
     comments: [{
         username: {
             type: String,
-            required: true
+            required: true,
+            match: validator.EMAIL
         },
         message: {
             type: String,
@@ -81,12 +85,14 @@ const news = new Schema({
     },
     likes: [{
         type: String,
-        required: true
+        required: true,
+        match: validator.EMAIL
     }],
     comments: [{
         username: {
             type: String,
-            required: true
+            required: true,
+            match: validator.EMAIL
         },
         message: {
             type: String,
@@ -107,7 +113,8 @@ const messages = new Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        match: validator.EMAIL
     },
     subject: String,
     body: String,

@@ -110,18 +110,18 @@ async function postLikes(req, res, next) {
     }
 
     db = await connectDB();
-    collName = await (() => 
-            new Promise((resolve, reject) => {
-                db.collection(DB_COLL_NAME).findOne({_id: ObjectId(paramsId)},
-                    (err, result) => {
-                    if (err || result === null) {
-                        res.status(400);
-                        reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
-                    }
-                    resolve(result);
-                });
-            })
-        )();
+    collName = await
+        new Promise((resolve, reject) => {
+            db.collection(DB_COLL_NAME).findOne({_id: ObjectId(paramsId)},
+                (err, result) => {
+                if (err || result === null) {
+                    res.status(400);
+                    reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
+                }
+                resolve(result);
+            });
+        });
+
     collName.likes = collName.likes || [];
     collName.rating = typeof collName.rating !== 'number' || isNaN(collName.rating) ? 0 :collName.rating;
     if (collName.likes.indexOf(email) >= 0) {
@@ -133,23 +133,23 @@ async function postLikes(req, res, next) {
     collName.rating += 1;
     collName.likes.push(email);
 
-    isPosted = await (() => 
-            new Promise((resolve, reject) => {
-                db.collection(DB_COLL_NAME).updateOne( {_id: ObjectId(paramsId)}, 
-                    { $set: {
-                            rating: collName.rating,
-                            likes: collName.likes
-                        }
-                    },
-                    (err, result) => {
-                        if (err) {
-                            res.status(400);
-                            reject(err);
-                        }
-                        resolve(result);
-                });
-            })
-        )();
+    isPosted = await
+        new Promise((resolve, reject) => {
+            db.collection(DB_COLL_NAME).updateOne( {_id: ObjectId(paramsId)}, 
+                { $set: {
+                        rating: collName.rating,
+                        likes: collName.likes
+                    }
+                },
+                (err, result) => {
+                    if (err) {
+                        res.status(400);
+                        reject(err);
+                    }
+                    resolve(result);
+            });
+        });
+
     db.close();
     res.json({
         message: `User ${email} like ${DB_COLL_NAME} with id ${paramsId}`,
@@ -159,6 +159,8 @@ async function postLikes(req, res, next) {
 
 
 async function postComments(req, res, next) {
+    let isIdFilled = validator.isIdFilled(req);
+    let isValidcomment = validator.isValidComment(req);
     let paramsId = req.params.id;
     let username = req.body.username;
     let message = req.body.message;
@@ -167,46 +169,47 @@ async function postComments(req, res, next) {
     let isPosted;
     let db;
 
+    if (isValidcomment.error || isIdFilled.error) {
+        next(isValidcomment.error || isIdFilled.error);
+        return;
+    }
+
     db = await connectDB();
-    collName = await (() => 
-            new Promise((resolve, reject) => {
-                db.collection(DB_COLL_NAME).findOne({_id: ObjectId(paramsId)},
-                    (err, result) => {
-                    if (err || result === null) {
+    collName = await
+        new Promise((resolve, reject) => {
+            db.collection(DB_COLL_NAME).findOne({_id: ObjectId(paramsId)},
+                (err, result) => {
+                if (err || result === null) {
+                    res.status(400);
+                    reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
+                }
+                resolve(result);
+            });
+        });
+    
+    isPosted = await
+        new Promise((resolve, reject) => {
+            db.collection(DB_COLL_NAME).updateOne({_id: ObjectId(paramsId)}, 
+                {$push: 
+                    {comments: {
+                        username: username,
+                        message: message
+                    }}
+                },
+                (err, result) => {
+                    if (err) {
                         res.status(400);
-                        reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
+                        reject(err);
                     }
                     resolve(result);
-                });
-            })
-        )();
-    
-    
-    isPosted = await (() => 
-            new Promise((resolve, reject) => {
-                db.collection(DB_COLL_NAME).updateOne({_id: ObjectId(paramsId)}, 
-                    {$push: 
-                     {comments: {
-                         username: username,
-                         message: message
-                     }}
-                    },
-                    (err, result) => {
-                        if (err) {
-                            res.status(400);
-                            reject(err);
-                        }
-                        resolve(result);
-                });
-            })
-        )();
+            });
+        });
 
     db.close();
     res.json({
         message: `User ${username} commented ${DB_COLL_NAME}: ${message}`
     });   
 }
-
 
 module.exports = {
     promiseWrapper,
