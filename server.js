@@ -53,7 +53,7 @@ app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
 function preprocessor(req, res, next) {
     if (process.env.ALLOWED_HOST && process.env.ALLOWED_HOST !== req.headers.host) {
         res.status(400);
-        next(new Error(`Only ${ORIGIN} request is allowed`));
+        next(new Error(`Only ${process.env.ALLOWED_HOST} request is allowed`));
         return;
     }
     if (CONTROL_AUTH && !req.headers.authorization) {
