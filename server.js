@@ -15,8 +15,10 @@ const authModule = require('./modules/auth-module');
 const mailSender = require('./modules/mail-sender');
 
 const CONTROL_AUTH = !process.env.PORT || process.env.USE_PASSPORT;
+const REQ_SIZE_LIMIT = 5242880;
 
 passport.use(new BasicStrategy(authModule.login));
+
 
 app.use(cors());
 app.use((req, res, next) => {
@@ -29,7 +31,11 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(bodyParser.json());
+app.use(bodyParser.json(
+    {
+        limit: REQ_SIZE_LIMIT
+    }
+));
 app.use(methodOverride());
 //during developing phase we activate passport mode only via setting USE_PASSPORT
 if (CONTROL_AUTH) {
