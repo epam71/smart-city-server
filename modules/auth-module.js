@@ -13,17 +13,47 @@ const USER_INFO_URL = 'https://smart-city-lviv.eu.auth0.com/userinfo';
 const AUTH0_ROLE_FIELD = 'https://role';
 const AUTH0_EMAIL_FIELD = 'https://email';
 let authMap;
+let loggedUsers = [];
 //basically we have four access level
 //root, investor, user, guest
+class LoggedUser {
+    constructor(username, accessToken, role) {
+        this.username = username;
+        this.accessToken = accessToken;
+        this.role = role;
+    }
+}
+
+function isUserLogged(username, accessToken) {
+    let role = '';
+    let user = loggedUsers.find(el => el.username === username);
+
+    if (user) {
+        if (user.accessToken === accessToken) {
+            role = user.role;
+        } else {
+            loggedUsers = loggedUsers.filter(el => el.username !== username);
+        }
+    }
+
+    return role;
+}
 
 function login(userName, password, done) {
+    let role;
+
     if (password === DEFAULT_GUEST_TOKEN) {
         return done( null, { 
             userName,
             role: DEFAULT_GUEST_ROLE 
-        });            
+        }); 
     } else if (!userName || !password) {
         done(new Error('Wrong username or token' + (!password ? ', empty token!': '')));
+    } else if ((role = isUserLogged(userName, password))) {
+        return done( null, { 
+            userName,
+            role 
+        });
     } else {
         //here we go to auth0 and verify the user
         //password is our accessToken
@@ -36,16 +66,19 @@ function login(userName, password, done) {
                     done(err);
                 } else {
                     let ob;
+                    let addWarn = '';
 
                     try {
                         ob = JSON.parse(body);
                     } catch (err) {
-                        done(new Error('Unable to parse auth0 user profile'));
+                        addWarn = body === 'Too Many Requests' ? ', please try later': '';
+                        done(new Error(`Auth0 - ${body}${addWarn}`));
                         return;
                     }
                     if (ob.hasOwnProperty(AUTH0_ROLE_FIELD) &&
                         ob.hasOwnProperty(AUTH0_EMAIL_FIELD) && 
                         ob[AUTH0_EMAIL_FIELD] === userName) {
+                        loggedUsers.push(new LoggedUser(userName, password, ob[AUTH0_ROLE_FIELD]));
                         done(null, { 
                             userName,
                             role: ob[AUTH0_ROLE_FIELD]
@@ -108,13 +141,6 @@ function posAuthMap(req, res, next) {
     }
 }
 
-function checkUser(req, res, next) {
-    let resObj = {message: 'Server identify the user'};
-
-    Object.assign(resObj,req.user);    
-    res.json(resObj)
-}
-
 readReadAuthMap();
 
 module.exports = {
@@ -122,5 +148,4 @@ module.exports = {
     accessControl: dbAgent.promiseWrapper(accessControl),
     getAuthMap: dbAgent.promiseWrapper(getAuthMap),
     postAuthMap: dbAgent.promiseWrapper(posAuthMap),
-    checkUser: dbAgent.promiseWrapper(checkUser)
 }
