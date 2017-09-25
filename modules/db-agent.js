@@ -188,7 +188,8 @@ async function postComments(req, res, next) {
                     {$push: 
                      {comments: {
                          username: username,
-                         message: message
+                         message: message,
+                         date: new Date()
                      }}
                     },
                     (err, result) => {
@@ -207,10 +208,58 @@ async function postComments(req, res, next) {
     });   
 }
 
+async function deleteComments(req, res, next) {
+    let paramsId = req.params.id;
+    let DB_COLL_NAME = req.url.split("/")[1];
+    let collName;
+    let isPosted;
+    let db;
+
+    db = await connectDB();
+    collName = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(DB_COLL_NAME).findOne({_id: ObjectId(paramsId)},
+                    (err, result) => {
+                    if (err || result === null) {
+                        res.status(400);
+                        reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
+                    }
+                    resolve(result);
+                });
+            })
+        )();
+    
+    
+    isPosted = await (() => 
+            new Promise((resolve, reject) => {
+                db.collection(DB_COLL_NAME).update({_id: ObjectId(paramsId)}, 
+                    {$pull: 
+                     {comments: {
+                        $each: [ username, message, date ],
+                        $position: 2
+                     }}
+                    },
+                    (err, result) => {
+                        if (err) {
+                            res.status(400);
+                            reject(err);
+                        }
+                        resolve(result);
+                });
+            })
+        )();
+
+    db.close();
+    res.json({
+        message: `Comment deleted!`
+    });   
+}
+
 
 module.exports = {
     promiseWrapper,
     restifyDB,
     postLikes: promiseWrapper(postLikes),
-    postComments: promiseWrapper(postComments)
+    postComments: promiseWrapper(postComments),
+    deleteComments: promiseWrapper(deleteComments)
 }
