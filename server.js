@@ -41,8 +41,9 @@ app.route(`/auth-maps` )
 app.post('/projects/:id/likes', dbAgent.postLikes);
 app.post('/news/:id/likes', dbAgent.postLikes);
 app.post('/projects/:id/comments', dbAgent.postComments);
-app.delete('/projects/:id/comments/commentId', dbAgent.deleteComments);
+app.delete('/projects/:id/comments/:commentId', dbAgent.deleteComments);
 app.post('/news/:id/comments', dbAgent.postComments);
+app.delete('/news/:id/comments/:commentId', dbAgent.deleteComments);
 app.post('/notifications', mailSender.sendEmail);
 
 dbAgent.restifyDB(router, onError);

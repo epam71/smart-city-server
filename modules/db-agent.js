@@ -192,6 +192,7 @@ async function postComments(req, res, next) {
             db.collection(DB_COLL_NAME).updateOne({_id: ObjectId(paramsId)}, 
                 {$push: 
                     {comments: {
+                        id: new ObjectId(),
                         username: username,
                         message: message,
                         date: new Date
@@ -215,12 +216,13 @@ async function postComments(req, res, next) {
 async function deleteComments(req, res, next) {
     let paramsId = req.params.id;
     let DB_COLL_NAME = req.url.split("/")[1];
+    let commentId = req.params.commentId;
     let collName;
     let isPosted;
     let db;
 
     db = await connectDB();
-    collName = await (() => 
+     collName = await
             new Promise((resolve, reject) => {
                 db.collection(DB_COLL_NAME).findOne({_id: ObjectId(paramsId)},
                     (err, result) => {
@@ -230,28 +232,26 @@ async function deleteComments(req, res, next) {
                     }
                     resolve(result);
                 });
-            })
-        )();
+            });
     
-    
-    isPosted = await (() => 
+    isPosted = await
             new Promise((resolve, reject) => {
                 db.collection(DB_COLL_NAME).update({_id: ObjectId(paramsId)}, 
-                    {$pull: 
-                     {comments: {
-                        $each: [ username, message, date ],
-                        $position: 2
-                     }}
+                    {$pull : 
+                     {comments : {
+                         id: ObjectId(commentId)
+                     }
+                     }
                     },
                     (err, result) => {
                         if (err) {
                             res.status(400);
                             reject(err);
                         }
+                    console.log(commentId);
                         resolve(result);
                 });
-            })
-        )();
+            });
 
     db.close();
     res.json({
