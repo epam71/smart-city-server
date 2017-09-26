@@ -248,8 +248,7 @@ async function deleteComments(req, res, next) {
                             res.status(400);
                             reject(err);
                         }
-                    console.log(commentId);
-                        resolve(result);
+                    resolve(result);
                 });
             });
 
