@@ -157,7 +157,6 @@ async function postLikes(req, res, next) {
     });    
 }
 
-
 async function postComments(req, res, next) {
     let isIdFilled = validator.isIdFilled(req);
     let isValidcomment = validator.isValidComment(req);
@@ -214,6 +213,7 @@ async function postComments(req, res, next) {
 }
 
 async function deleteComments(req, res, next) {
+    let isIdCommentIdFilled = validator.isIdCommentIdFilled(req);
     let paramsId = req.params.id;
     let DB_COLL_NAME = req.url.split("/")[1];
     let commentId = req.params.commentId;
@@ -221,36 +221,42 @@ async function deleteComments(req, res, next) {
     let isPosted;
     let db;
 
+    if (isIdCommentIdFilled.error) {
+        res.status(400);
+        next(isIdCommentIdFilled.error);
+        return;
+    }
+
     db = await connectDB();
-     collName = await
-            new Promise((resolve, reject) => {
-                db.collection(DB_COLL_NAME).findOne({_id: ObjectId(paramsId)},
-                    (err, result) => {
-                    if (err || result === null) {
-                        res.status(400);
-                        reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
-                    }
-                    resolve(result);
-                });
+    collName = await
+        new Promise((resolve, reject) => {
+            db.collection(DB_COLL_NAME).findOne({_id: ObjectId(paramsId)},
+                (err, result) => {
+                if (err || result === null) {
+                    res.status(400);
+                    reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
+                }
+                resolve(result);
             });
+        });
     
     isPosted = await
-            new Promise((resolve, reject) => {
-                db.collection(DB_COLL_NAME).update({_id: ObjectId(paramsId)}, 
-                    {$pull : 
-                     {comments : {
-                         id: ObjectId(commentId)
-                     }
-                     }
-                    },
-                    (err, result) => {
-                        if (err) {
-                            res.status(400);
-                            reject(err);
+        new Promise((resolve, reject) => {
+            db.collection(DB_COLL_NAME).update({_id: ObjectId(paramsId)}, 
+                {$pull: 
+                    {comments: {
+                            id: ObjectId(commentId)
                         }
+                    }
+                },
+                (err, result) => {
+                    if (err) {
+                        res.status(400);
+                        reject(err);
+                    }
                     resolve(result);
-                });
             });
+        });
 
     db.close();
     res.json({
