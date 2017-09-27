@@ -29,7 +29,7 @@ app.use(bodyParser.json(
     }
 ));
 app.use(methodOverride());
-//during developing phase we activate passport mode only via setting USE_PASSPORT
+//during developing phase we activate passport mode only via setting CONTROL_AUTH
 if (CONTROL_AUTH) {
     app.use(passport.authenticate('basic', { session: false }));
     app.use(authModule.accessControl);
@@ -39,9 +39,9 @@ app.route(`/auth-maps` )
     .post(authModule.postAuthMap);
 
 app.post('/projects/:id/likes', dbAgent.postLikes);
-app.post('/news/:id/likes', dbAgent.postLikes);
 app.post('/projects/:id/comments', dbAgent.postComments);
 app.delete('/projects/:id/comments/:commentId', dbAgent.deleteComments);
+app.post('/news/:id/likes', dbAgent.postLikes);
 app.post('/news/:id/comments', dbAgent.postComments);
 app.delete('/news/:id/comments/:commentId', dbAgent.deleteComments);
 app.post('/notifications', mailSender.sendEmail);

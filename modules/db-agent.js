@@ -157,7 +157,6 @@ async function postLikes(req, res, next) {
     });    
 }
 
-
 async function postComments(req, res, next) {
     let isIdFilled = validator.isIdFilled(req);
     let isValidcomment = validator.isValidComment(req);
@@ -210,10 +209,17 @@ async function postComments(req, res, next) {
 }
 
 async function deleteComments(req, res, next) {
+    let isIdCommentIdFilled = validator.isIdCommentIdFilled(req);
     let paramsId = req.params.id;
     let dbCollName = req.url.split("/")[1];
     let commentId = req.params.commentId;
     let db;
+
+    if (isIdCommentIdFilled.error) {
+        res.status(400);
+        next(isIdCommentIdFilled.error);
+        return;
+    }
 
     db = await connectDB();
     await new Promise((resolve, reject) => {
@@ -224,8 +230,8 @@ async function deleteComments(req, res, next) {
                         reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
                     }
                     resolve(result);
-                });
-            });
+               });
+        });
     
     await new Promise((resolve, reject) => {
                 db.collection(dbCollName).update({_id: ObjectId(paramsId)}, 
@@ -241,8 +247,8 @@ async function deleteComments(req, res, next) {
                             reject(err);
                         }
                     resolve(result);
-                });
-            });
+              });
+        });
 
     db.close();
     res.json({
