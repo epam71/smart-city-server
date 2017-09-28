@@ -97,55 +97,33 @@ function accessControl(req, res, next) {
 
     if (!authMap.find(el => 
             (el.method === anyValue || el.method === req.method) &&
-            (el.path === anyValue || req.url.indexOf(el.path) === 0) &&
-            ( el.role === anyValue || el.role === user.role)
+            (el.path === anyValue || req.url.match(new RegExp(el.path))) &&
+            (el.role === anyValue || el.role === user.role)
         )) {
 
         res.status(401);
         next(new Error(`Unauthorized ${user.userName} ${req.method} ${req.url}`));
+        return;
     }
     next();
 }
 
-function readReadAuthMap() {
-    try {
-        authMap = JSON.parse(fs.readFileSync(AUTH_MAP_FILE));
-    } catch(err) {
-        console.log('Auth map confiration error');
-    }
+function refreshAuthMap() {
+    authMap = authMap || [];
+
+    dbAgent.readAuthMap()
+        .then( res => {
+            authMap = res
+        })
+        .catch( err => 
+            console.log(`Auth map configuration error: ${err}`)
+        );
 }
 
-function writeReadAuthMap() {
-    fs.writeFileSync(AUTH_MAP_FILE, JSON.stringify(authMap));
-}    
-
-function getAuthMap(req, res, next) {
-    res.json(authMap);
-}
-
-function posAuthMap(req, res, next) {
-    let isValidAuthMap = validator.isValidAuthMap(req);
-    let tempAuthMap = authMap;
-
-    if (isValidAuthMap.error) {
-        next(isValidAuthMap.error);
-    }
- 
-    try {
-        authMap = req.body;
-        writeReadAuthMap();
-        res.json({message: 'Auth map has been updated'});
-    } catch(err) {
-        authMap = tempAuthMap;
-        next(err);
-    }
-}
-
-readReadAuthMap();
+refreshAuthMap();
 
 module.exports = {
     login,
     accessControl: dbAgent.promiseWrapper(accessControl),
-    getAuthMap: dbAgent.promiseWrapper(getAuthMap),
-    postAuthMap: dbAgent.promiseWrapper(posAuthMap),
+    refreshAuthMap
 }
