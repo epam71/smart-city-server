@@ -95,14 +95,15 @@ function accessControl(req, res, next) {
     const anyValue = '*';
     let user = req.user;    
 
-    if (!authMap.find(el => 
+    if (!dbAgent.isStaticImg(req) && !authMap.find(el => 
             (el.method === anyValue || el.method === req.method) &&
-            (el.path === anyValue || req.url.indexOf(el.path) === 0) &&
-            ( el.role === anyValue || el.role === user.role)
+            (el.path === anyValue || req.url.match(new RegExp(el.path))) &&
+            (el.role === anyValue || el.role === user.role)
         )) {
 
         res.status(401);
         next(new Error(`Unauthorized ${user.userName} ${req.method} ${req.url}`));
+        return;
     }
     next();
 }
@@ -129,10 +130,12 @@ function posAuthMap(req, res, next) {
 
     if (isValidAuthMap.error) {
         next(isValidAuthMap.error);
+        return;
     }
  
     try {
         authMap = req.body;
+        authMap.sort((a, b) => a.path + a.method + a.role <= b.path + b.method + b.role ? -1 : 1 );
         writeReadAuthMap();
         res.json({message: 'Auth map has been updated'});
     } catch(err) {
