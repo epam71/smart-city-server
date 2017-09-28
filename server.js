@@ -18,8 +18,7 @@ const CONTROL_AUTH = !process.env.PORT || process.env.USE_PASSPORT;
 const REQ_SIZE_LIMIT = 5242880;
 
 passport.use(new BasicStrategy(authModule.login));
-
-
+app.use('/images', express.static(`${__dirname}/images`));
 app.use(cors());
 app.use(dbAgent.promiseWrapper(preprocessor));
 
@@ -29,7 +28,7 @@ app.use(bodyParser.json(
     }
 ));
 app.use(methodOverride());
-//during developing phase we activate passport mode only via setting CONTROL_AUTH
+
 if (CONTROL_AUTH) {
     app.use(passport.authenticate('basic', { session: false }));
     app.use(authModule.accessControl);
@@ -57,6 +56,9 @@ function preprocessor(req, res, next) {
         res.status(400);
         next(new Error(`Only ${process.env.ALLOWED_ORIGIN} request is allowed, your origin is ${req.headers.origin}`));
         return;
+    }
+    if (dbAgent.isStaticImg(req)) {
+        req.header.authorization = `Basic ${authModule.DEFAULT_GUEST_TOKEN}:${authModule.DEFAULT_GUEST_TOKEN}`;
     }
     if (CONTROL_AUTH && !req.headers.authorization) {
         res.status(400);

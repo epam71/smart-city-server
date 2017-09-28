@@ -35,7 +35,7 @@ function isEmailFilled(req) {
 function isValidAuthMap(req) {
     const authMapScheme = Joi.array().items( {
         method: Joi.string().allow('POST', 'GET', 'PUT', 'PATCH','DELETE', '*').required(),
-        path: Joi.string().regex(/^(\/|[*])/).required(),
+        path: Joi.string().required(),
         role: Joi.string().allow('root', 'investor', 'user', 'guest').required(),
     }).min(1);
 

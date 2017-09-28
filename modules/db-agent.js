@@ -7,6 +7,7 @@ const restify = require('express-restify-mongoose');
 
 const validator = require('./validator');
 const dbSchemes = require('./db-schemes');
+const imgAgent = require('./img-agent');
 
 const PROJECT_COLL_NAME = 'projects';
 const NEWS_COLL_NAME = 'news';
@@ -19,12 +20,80 @@ function promiseWrapper(func) {
     };
 }
 
-function hasId(req,res,next){
- if(req.params && !req.params.hasOwnProperty("id")){
-    res.status(400);
-    next(new Error('To delete item you need to enter id.'));
-  }
-  next();
+function isStaticImg(req) {
+    return req.url.indexOf('/images') === 0
+}
+
+async function postCreate(req, res, next) {
+    let id = req.erm.result.id;    
+    let db, fullImgName;
+
+    if (req.body.image) {
+        fullImgName = await imgAgent.saveImg(imgAgent.formImgFilename(req, id), req.body.image)
+
+        db = await connectDB();
+        await new Promise((resolve, reject) => {
+            db.collection(req.url.split('/')[ 1 ]).updateOne(
+                { _id: ObjectId(id) },
+                { $set: 
+                    { image: fullImgName }
+                },
+                (err, res) => {
+                    if (err) {
+                        next(err);
+                        return;
+                    }
+                    resolve(res);
+                }
+            );
+        })
+        next();
+    }
+}
+
+async function preUpdate(req, res, next) {
+    let id = req.params.id;
+
+    if (req.body.image) {
+        await removeImage(req);
+        imgAgent.saveImg(imgAgent.formImgFilename(req, id),req.body.image)
+            .then(fullImgName => { 
+                req.body.image = fullImgName;
+                next();
+            })
+            .catch( err => next(err));
+    }
+}
+
+async function preDelete(req, res, next) {
+    if  (req.params && !req.params.hasOwnProperty('id')){
+        res.status(400);
+        next(new Error('To delete item you need to enter id.'));
+        return;
+    }    
+    await removeImage(req);
+    next();
+}
+
+async function removeImage(req) {
+    let db;
+    let imgFilename;
+
+    db = await connectDB();
+    return new Promise( (resolve,reject) => {
+        db.collection(req.url.split('/')[ 1 ]).findOne(
+            { _id: ObjectId(req.params.id) },
+            { image: true },
+            (err, res) => {
+                if (err) {
+                    throw err;
+                }
+                imgFilename = res.image;
+                imgAgent.removeImg(imgFilename);
+                resolve();
+            }        
+        );
+    });
 }
 
 function restifyProjects(router) {
@@ -33,8 +102,12 @@ function restifyProjects(router) {
         mongoose.model(
             PROJECT_COLL_NAME,
             dbSchemes.projects
-            ), {preDelete: hasId
-            });
+        ),
+        {
+            postCreate: postCreate,
+            preUpdate: preUpdate,
+            preDelete: preDelete
+        });
 
     console.log(`project URI : ${projectsURI}`);
 }
@@ -45,8 +118,12 @@ function restifyNews(router) {
         mongoose.model(
             NEWS_COLL_NAME,
             dbSchemes.news
-            ),{preDelete: hasId
-            });
+        ),
+        {
+            postCreate: postCreate,
+            preUpdate: preUpdate,
+            preDelete: preDelete
+        });
 
     console.log(`news URI : ${newsURI}`);
 }
@@ -57,8 +134,10 @@ function restifyMessages(router) {
         mongoose.model(
             MESSAGE_COLL_NAME,
             dbSchemes.messages
-            ),{preDelete: hasId
-            });
+        ),
+        {
+            preDelete: preDelete
+        });
 
     console.log(`messages URI : ${messagesURI}`);
 }
@@ -152,7 +231,7 @@ async function postLikes(req, res, next) {
 
     db.close();
     res.json({
-        message: `You liked this ${DB_COLL_NAME}`,
+        message: `You liked this ${dbCollName}`,
         currentRating: collName.rating
     });    
 }
@@ -259,7 +338,8 @@ async function deleteComments(req, res, next) {
 module.exports = {
     promiseWrapper,
     restifyDB,
+    isStaticImg,
     postLikes: promiseWrapper(postLikes),
     postComments: promiseWrapper(postComments),
-    deleteComments: promiseWrapper(deleteComments)
+    deleteComments: promiseWrapper(deleteComments)    
 }
