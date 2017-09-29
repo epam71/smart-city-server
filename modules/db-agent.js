@@ -11,6 +11,9 @@ const dbSchemes = require('./db-schemes');
 const PROJECT_COLL_NAME = 'projects';
 const NEWS_COLL_NAME = 'news';
 const MESSAGE_COLL_NAME = 'messages';
+const AUTH_COLL_NAME = 'auth-maps';
+
+let funcRefreshAuthMap;
 
 function promiseWrapper(func) {
     return (req, res, next) => {
@@ -19,13 +22,59 @@ function promiseWrapper(func) {
     };
 }
 
-function hasId(req,res,next){
- if(req.params && !req.params.hasOwnProperty("id")){
-    res.status(400);
-    next(new Error('To delete item you need to enter id.'));
-  }
-  next();
+async function preDelete(req, res, next) {
+    if  (req.params && !req.params.hasOwnProperty('id')){
+        res.status(400);
+        next(new Error('To delete item you need to enter id.'));
+        return;
+    }    
+    next();
 }
+
+async function readAuthMap() {
+    let db = await connectDB();
+
+    return new Promise((resolve, reject) => {
+        db.collection(AUTH_COLL_NAME).find({}).toArray( (err, res) => {
+            if (err) {
+                console.log('Unable get auth map data from database');
+                reject(err);
+            }
+            resolve(res);
+        });
+    })
+}
+
+function setAuthMapRefresher(handler) {
+    funcRefreshAuthMap = handler;
+}
+
+function  refreshAuthMap(req, res, next ) {
+    if (funcRefreshAuthMap) {
+        funcRefreshAuthMap();
+    }
+    next();
+}
+
+function restifyAuthMaps(router) {
+    const authMapsURI = restify.serve(
+        router,
+        mongoose.model(
+            AUTH_COLL_NAME,
+            new mongoose.Schema(
+                dbSchemes.AUTH_MAPS, 
+                { strict: true }
+            )
+        ),
+        {
+            postCreate: refreshAuthMap,
+            postDelete: refreshAuthMap,
+            postUpdate: refreshAuthMap
+        });
+
+    console.log(`Auth-maps URI : ${authMapsURI}`);
+}
+
 
 function restifyProjects(router) {
     const projectsURI = restify.serve(
@@ -33,8 +82,10 @@ function restifyProjects(router) {
         mongoose.model(
             PROJECT_COLL_NAME,
             dbSchemes.projects
-            ), {preDelete: hasId
-            });
+        ),
+        {
+            preDelete: promiseWrapper(preDelete)
+        });
 
     console.log(`project URI : ${projectsURI}`);
 }
@@ -45,8 +96,10 @@ function restifyNews(router) {
         mongoose.model(
             NEWS_COLL_NAME,
             dbSchemes.news
-            ),{preDelete: hasId
-            });
+        ),
+        {
+            preDelete: promiseWrapper(preDelete)
+        });
 
     console.log(`news URI : ${newsURI}`);
 }
@@ -57,8 +110,10 @@ function restifyMessages(router) {
         mongoose.model(
             MESSAGE_COLL_NAME,
             dbSchemes.messages
-            ),{preDelete: hasId
-            });
+        ),
+        {
+            preDelete: promiseWrapper(preDelete)
+        });
 
     console.log(`messages URI : ${messagesURI}`);
 }
@@ -80,6 +135,7 @@ function restifyDB(router, onError) {
         restifyProjects(router);
         restifyNews(router);
         restifyMessages(router);
+        restifyAuthMaps(router);
     });
 }
 
@@ -152,11 +208,10 @@ async function postLikes(req, res, next) {
 
     db.close();
     res.json({
-        message: `You liked this ${DB_COLL_NAME}`,
+        message: `You liked this ${dbCollName}`,
         currentRating: collName.rating
     });    
 }
-
 
 async function postComments(req, res, next) {
     let isIdFilled = validator.isIdFilled(req);
@@ -210,10 +265,17 @@ async function postComments(req, res, next) {
 }
 
 async function deleteComments(req, res, next) {
+    let isIdCommentIdFilled = validator.isIdCommentIdFilled(req);
     let paramsId = req.params.id;
     let dbCollName = req.url.split("/")[1];
     let commentId = req.params.commentId;
     let db;
+
+    if (isIdCommentIdFilled.error) {
+        res.status(400);
+        next(isIdCommentIdFilled.error);
+        return;
+    }
 
     db = await connectDB();
     await new Promise((resolve, reject) => {
@@ -224,8 +286,8 @@ async function deleteComments(req, res, next) {
                         reject(err || new Error(`This id ${paramsId} doesn\'t exist`));
                     }
                     resolve(result);
-                });
-            });
+               });
+        });
     
     await new Promise((resolve, reject) => {
                 db.collection(dbCollName).update({_id: ObjectId(paramsId)}, 
@@ -241,8 +303,8 @@ async function deleteComments(req, res, next) {
                             reject(err);
                         }
                     resolve(result);
-                });
-            });
+              });
+        });
 
     db.close();
     res.json({
@@ -255,5 +317,7 @@ module.exports = {
     restifyDB,
     postLikes: promiseWrapper(postLikes),
     postComments: promiseWrapper(postComments),
-    deleteComments: promiseWrapper(deleteComments)
+    deleteComments: promiseWrapper(deleteComments),
+    readAuthMap,
+    setAuthMapRefresher
 }

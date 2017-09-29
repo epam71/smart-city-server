@@ -19,7 +19,6 @@ const REQ_SIZE_LIMIT = 5242880;
 
 passport.use(new BasicStrategy(authModule.login));
 
-
 app.use(cors());
 app.use(dbAgent.promiseWrapper(preprocessor));
 
@@ -29,19 +28,16 @@ app.use(bodyParser.json(
     }
 ));
 app.use(methodOverride());
-//during developing phase we activate passport mode only via setting USE_PASSPORT
+
 if (CONTROL_AUTH) {
     app.use(passport.authenticate('basic', { session: false }));
     app.use(authModule.accessControl);
 }
-app.route(`/auth-maps` )
-    .get(authModule.getAuthMap)
-    .post(authModule.postAuthMap);
 
 app.post('/projects/:id/likes', dbAgent.postLikes);
-app.post('/news/:id/likes', dbAgent.postLikes);
 app.post('/projects/:id/comments', dbAgent.postComments);
 app.delete('/projects/:id/comments/:commentId', dbAgent.deleteComments);
+app.post('/news/:id/likes', dbAgent.postLikes);
 app.post('/news/:id/comments', dbAgent.postComments);
 app.delete('/news/:id/comments/:commentId', dbAgent.deleteComments);
 app.post('/notifications', mailSender.sendEmail);
@@ -50,7 +46,10 @@ dbAgent.restifyDB(router, onError);
 app.use(router);
 app.use(onError);
 
-app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
+app.listen(PORT, () => { 
+    console.log(`Server started on port: ${PORT}`)
+    dbAgent.setAuthMapRefresher(authModule.refreshAuthMap);
+});
 
 function preprocessor(req, res, next) {
     if (process.env.ALLOWED_ORIGIN && process.env.ALLOWED_ORIGIN !== req.headers.origin) {

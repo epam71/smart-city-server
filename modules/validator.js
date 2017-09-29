@@ -15,6 +15,15 @@ function isIdFilled(req) {
     return Joi.validate(req.params,scheme);
 }
 
+function isIdCommentIdFilled(req) {
+    const scheme = Joi.object().keys({
+        id: Joi.string().required(),
+        commentId: Joi.string().required()
+    });
+
+    return Joi.validate(req.params,scheme);
+}
+
 function isEmailFilled(req) {
     const scheme = Joi.object().keys({
         email: Joi.string().email().required()
@@ -26,7 +35,7 @@ function isEmailFilled(req) {
 function isValidAuthMap(req) {
     const authMapScheme = Joi.array().items( {
         method: Joi.string().allow('POST', 'GET', 'PUT', 'PATCH','DELETE', '*').required(),
-        path: Joi.string().regex(/^(\/|[*])/).required(),
+        path: Joi.string().required(),
         role: Joi.string().allow('root', 'investor', 'user', 'guest').required(),
     }).min(1);
 
@@ -56,6 +65,7 @@ function isValidComment(req) {
 module.exports = {
     isValidAuthMap,
     isIdFilled,
+    isIdCommentIdFilled,
     isEmailFilled,
     isEmailBodyValid,
     isValidComment,
