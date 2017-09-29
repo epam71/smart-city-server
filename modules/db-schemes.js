@@ -131,8 +131,26 @@ const messages = new Schema({
     }
 });
 
+const AUTH_MAPS = {
+    method: {
+        type: String,
+        required: true,
+        enum: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', '*']
+    },
+    path: {
+        type: String,
+        required: true        
+    },
+    role : {
+        type: String,
+        required: true,
+        enum: ['root', 'user', 'guest', 'investor', '*']
+    }
+}
+
 module.exports = {
     projects,
     news,
-    messages
+    messages,
+    AUTH_MAPS
 }
