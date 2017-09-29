@@ -18,7 +18,7 @@ function sendEmail(req, res, next) {
         from: OUR_EMAIL,
         to: emailTo,
         subject: req.body.subject,
-        text: req.body.next,
+        text: req.body.text,
         html: req.body.html
     };    
 
