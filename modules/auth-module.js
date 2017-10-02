@@ -17,7 +17,7 @@ const CLIENT_TOKEN_URL = 'https://smart-city-lviv.eu.auth0.com/oauth/token';
 const AUTH0_TOKEN_GENERATOR = {
     grant_type:"client_credentials",
     client_id: process.env.AUTH0_CLIENT_ID,
-    client_secret: process.AUTH0_CLIENT_KEY,
+    client_secret: process.env.AUTH0_CLIENT_KEY,
     audience: "https://smart-city-lviv.eu.auth0.com/api/v2/"
 }
 const AUTH0_USER_URL = 'https://smart-city-lviv.eu.auth0.com/api/v2/users';
