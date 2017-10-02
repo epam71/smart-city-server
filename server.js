@@ -41,6 +41,7 @@ app.post('/news/:id/likes', dbAgent.postLikes);
 app.post('/news/:id/comments', dbAgent.postComments);
 app.delete('/news/:id/comments/:commentId', dbAgent.deleteComments);
 app.post('/notifications', mailSender.sendEmail);
+app.get('/users', authModule.getUsers);
 
 dbAgent.restifyDB(router, onError);
 app.use(router);

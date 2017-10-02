@@ -12,6 +12,18 @@ const ROOT_ROLE = 'root';
 const USER_INFO_URL = 'https://smart-city-lviv.eu.auth0.com/userinfo';
 const AUTH0_ROLE_FIELD = 'https://role';
 const AUTH0_EMAIL_FIELD = 'https://email';
+const AUTH0_EXPIRATION_INTERVAL = ( 24 * 60 * 60 - 1) * 1000; 
+const CLIENT_TOKEN_URL = 'https://smart-city-lviv.eu.auth0.com/oauth/token';
+const AUTH0_TOKEN_GENERATOR = {
+    grant_type:"client_credentials",
+    client_id: process.env.client_id,
+    client_secret: process.env.client_key,
+    audience: "https://smart-city-lviv.eu.auth0.com/api/v2/"
+}
+const AUTH0_USER_URL = 'https://smart-city-lviv.eu.auth0.com/api/v2/users';
+
+let clientToken = '';
+let clientTokenExpiredAt = 0;
 let authMap;
 let loggedUsers = [];
 //basically we have four access level
@@ -120,10 +132,48 @@ function refreshAuthMap() {
         );
 }
 
+function getClientToken(next) {
+    return new Promise((resolve, reject) => {
+        request.post({
+            url: CLIENT_TOKEN_URL,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(AUTH0_TOKEN_GENERATOR)
+        }, 
+        (err, subRes, body) => {
+            if (err) {
+                next(err);
+                return;
+            }
+            resolve(JSON.parse(body).access_token);
+        });
+    });
+}
+
+async function getUsers(req, res, next) {
+
+    if (clientTokenExpiredAt < Date.now()) {        
+        clientToken = await getClientToken(next);
+        clientTokenExpiredAt = Date.now() + AUTH0_EXPIRATION_INTERVAL;
+    }
+
+    request.get( { 
+        url: AUTH0_USER_URL,
+        headers: {'Authorization': `Bearer ${clientToken}`}
+    }, 
+    (err, subRes, body) => {
+        if (err) {
+            next(err);
+            return;
+        }
+        res.json({usersCount: JSON.parse(body).length});
+    });
+}
+
 refreshAuthMap();
 
 module.exports = {
     login,
     accessControl: dbAgent.promiseWrapper(accessControl),
+    getUsers: dbAgent.promiseWrapper(getUsers),
     refreshAuthMap
 }
