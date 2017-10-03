@@ -80,6 +80,10 @@ const news = new Schema({
         required: true
     },
     image: String,
+    imageKey: [{
+        type: String,
+        required: true
+    }],
     desc: String,
     approved: Boolean,
     date: {
