@@ -20,10 +20,10 @@ const projects = new Schema({
     },
     desc: String,
     image: String,
-    imageKey: [{
+    imageKey: {
         type: String,
         required: true
-    }],
+    },
     goals: String,
     result: String,
     rating: { 
@@ -80,10 +80,10 @@ const news = new Schema({
         required: true
     },
     image: String,
-    imageKey: [{
+    imageKey: {
         type: String,
         required: true
-    }],
+    },
     desc: String,
     approved: Boolean,
     date: {
