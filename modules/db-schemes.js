@@ -20,6 +20,10 @@ const projects = new Schema({
     },
     desc: String,
     image: String,
+    imageKey: [{
+        type: String,
+        required: true
+    }],
     goals: String,
     result: String,
     rating: { 
