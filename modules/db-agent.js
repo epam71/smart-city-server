@@ -180,14 +180,16 @@ async function postLikes(req, res, next) {
 
     collName.likes = collName.likes || [];
     collName.rating = typeof collName.rating !== 'number' || isNaN(collName.rating) ? 0 :collName.rating;
-    if (collName.likes.indexOf(email) >= 0) {
-        res.status(400);
-        next(new Error(`User ${email} can't post like twice`));
-        return;
+    
+    let index = collName.likes.indexOf(email);
+    if (index >= 0) {
+        collName.rating -= 1;
+        collName.likes.splice(index, 1);
     }
-
-    collName.rating += 1;
-    collName.likes.push(email);
+    else{
+        collName.rating += 1;
+        collName.likes.push(email);
+    }
 
     isPosted = await
         new Promise((resolve, reject) => {
@@ -208,7 +210,6 @@ async function postLikes(req, res, next) {
 
     db.close();
     res.json({
-        message: `You liked this ${dbCollName}`,
         currentRating: collName.rating
     });    
 }
